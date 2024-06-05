@@ -104,7 +104,7 @@ if uploaded_files:
             
             report_name, num_pages, package_name, model_name, datasource_details, page_details = parse_cognos_report(xml_content)
             
-            st.info("Report Details")
+            #st.info("Report Details")
             st.write(f"**Report Name:** {report_name}")
             st.write(f"**Number of Pages:** {num_pages}")
             st.write(f"**Package Name:** {package_name}")
