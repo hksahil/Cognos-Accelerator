@@ -164,7 +164,7 @@ if uploaded_files:
         'Expression', 'Rollup Aggregate', 'Aggregate', 'Used in Report Page'
     ]]
 
-    st.info("Final Dataframe with Union of All Queries")
+    st.info("Report Analysis")
     st.dataframe(final_columns_df)
 
     # Add download button for the final dataframe
