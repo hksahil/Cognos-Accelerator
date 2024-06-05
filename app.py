@@ -176,4 +176,4 @@ if uploaded_files:
         mime='text/csv',
     )
 else:
-    st.write("Please upload one or more Cognos reports in txt format.")
+    print("Please upload one or more Cognos reports in txt format.")
