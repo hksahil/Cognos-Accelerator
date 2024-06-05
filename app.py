@@ -89,7 +89,7 @@ def parse_cognos_report(xml_content):
     
     return report_name, num_pages, package_name, model_name, datasource_details, page_details
 
-st.title("Cognos Accelerator", help="This accelerator extracts the metadata from Cognos reports such as datasources used in report, columns used in report pages & much more ")
+st.title("Cognos Frontend Accelerator", help="This accelerator extracts the metadata from Cognos reports such as datasources used in report, columns used in report pages & much more ")
 
 uploaded_files = st.file_uploader("Upload Cognos Report(s) in txt format)", type="txt", accept_multiple_files=True)
 
