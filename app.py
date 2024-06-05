@@ -96,6 +96,8 @@ uploaded_files = st.file_uploader("Upload Cognos Report(s) in txt format)", type
 if uploaded_files:
     tabs = st.tabs([f"Report {i+1}" for i in range(len(uploaded_files))])
     
+    final_columns_df = pd.DataFrame()
+
     for tab, uploaded_file in zip(tabs, uploaded_files):
         with tab:
             xml_content = uploaded_file.read().decode("utf-8")
@@ -128,8 +130,50 @@ if uploaded_files:
                 for content in page['content']:
                     st.write(f"**Referenced Query:** {content['ref_query']}")
                     if content['columns']:
-                        #st.write("**Columns in the List:**")
                         columns_df = pd.DataFrame(content['columns'], columns=['Column Name'])
                         st.dataframe(columns_df)
+    
+            # Collecting data for the final dataframe
+            rows = []
+            for datasource in datasource_details:
+                query_name = datasource['query_name']
+                for column in datasource['columns']:
+                    used_in_page = "No"
+                    page_name = "N/A"
+                    for page in page_details:
+                        for content in page['content']:
+                            if content['ref_query'] == query_name and column['name'] in content['columns']:
+                                used_in_page = "Yes"
+                                page_name = page['page_name']
+                                break
+                    rows.append({
+                        'Report Name': report_name,
+                        'Query Name': query_name,
+                        'Report Page Name': page_name,
+                        'Column Name': column['name'],
+                        'Expression': column['expression'],
+                        'Rollup Aggregate': column['rollupAggregate'],
+                        'Aggregate': column['aggregate'],
+                        'Used in Report Page': used_in_page
+                    })
+            final_columns_df = pd.concat([final_columns_df, pd.DataFrame(rows)], ignore_index=True)
+
+    # Rearranging columns so that 'Report Name' is first
+    final_columns_df = final_columns_df[[
+        'Report Name', 'Report Page Name', 'Query Name', 'Column Name', 
+        'Expression', 'Rollup Aggregate', 'Aggregate', 'Used in Report Page'
+    ]]
+
+    st.info("Final Dataframe with Union of All Queries")
+    st.dataframe(final_columns_df)
+
+    # Add download button for the final dataframe
+    csv = final_columns_df.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="Download data as CSV",
+        data=csv,
+        file_name='final_report_data.csv',
+        mime='text/csv',
+    )
 else:
     st.write("Please upload one or more Cognos reports in txt format.")
