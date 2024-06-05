@@ -1,6 +1,3 @@
-## Cognos report analyser
-# Get report name, package name, model name, page details, datasource detail, calcs
-
 import streamlit as st
 import xml.etree.ElementTree as ET
 import pandas as pd
@@ -92,44 +89,47 @@ def parse_cognos_report(xml_content):
     
     return report_name, num_pages, package_name, model_name, datasource_details, page_details
 
-st.title("Cognos Accelerator")
+st.title("Cognos Accelerator", help="This accelerator extracts the metadata from Cognos reports such as datasources used in report, columns used in report pages & much more ")
 
-uploaded_file = st.file_uploader("Upload Cognos Report XML (in .txt format)", type="txt")
+uploaded_files = st.file_uploader("Upload Cognos Report(s) in txt format)", type="txt", accept_multiple_files=True)
 
-if uploaded_file is not None:
-    xml_content = uploaded_file.read().decode("utf-8")
+if uploaded_files:
+    tabs = st.tabs([f"Report {i+1}" for i in range(len(uploaded_files))])
     
-    report_name, num_pages, package_name, model_name, datasource_details, page_details = parse_cognos_report(xml_content)
-    
-    st.header("Report Details")
-    st.write(f"**Report Name:** {report_name}")
-    st.write(f"**Number of Pages:** {num_pages}")
-    st.write(f"**Package Name:** {package_name}")
-    st.write(f"**Model Name:** {model_name}")
-    
-    st.header("Datasource Details")
-    for datasource in datasource_details:
-        st.subheader(f"Query Name: {datasource['query_name']}")
-        
-        if datasource['columns']:
-            st.write("**Columns:**")
-            columns_df = pd.DataFrame(datasource['columns'])
-            st.table(columns_df)
-        
-        if datasource['detail_filters']:
-            st.write("**Detail Filters:**")
-            filters_df = pd.DataFrame(datasource['detail_filters'])
-            st.table(filters_df)
-    
-    st.header("Page Details")
-    for page in page_details:
-        st.subheader(f"Page Name: {page['page_name']}")
-        
-        for content in page['content']:
-            st.write(f"**Referenced Query:** {content['ref_query']}")
-            if content['columns']:
-                st.write("**Columns in the List:**")
-                columns_df = pd.DataFrame(content['columns'], columns=['Column Name'])
-                st.table(columns_df)
+    for tab, uploaded_file in zip(tabs, uploaded_files):
+        with tab:
+            xml_content = uploaded_file.read().decode("utf-8")
+            
+            report_name, num_pages, package_name, model_name, datasource_details, page_details = parse_cognos_report(xml_content)
+            
+            st.info("Report Details")
+            st.write(f"**Report Name:** {report_name}")
+            st.write(f"**Number of Pages:** {num_pages}")
+            st.write(f"**Package Name:** {package_name}")
+            st.write(f"**Model Name:** {model_name}")
+            
+            st.info("Datasources used in the Report")
+            for datasource in datasource_details:
+                st.code(f"Query Name: {datasource['query_name']}")
+                
+                if datasource['columns']:
+                    columns_df = pd.DataFrame(datasource['columns'])
+                    st.dataframe(columns_df)
+                
+                if datasource['detail_filters']:
+                    st.write("**Detail Filters:**")
+                    filters_df = pd.DataFrame(datasource['detail_filters'])
+                    st.dataframe(filters_df)
+            
+            st.info("Pages present inside Report")
+            for page in page_details:
+                st.subheader(f"Report Page: {page['page_name']}")
+                
+                for content in page['content']:
+                    st.write(f"**Referenced Query:** {content['ref_query']}")
+                    if content['columns']:
+                        #st.write("**Columns in the List:**")
+                        columns_df = pd.DataFrame(content['columns'], columns=['Column Name'])
+                        st.dataframe(columns_df)
 else:
-    st.info("Please upload a Cognos report XML file in .txt format.")
+    st.write("Please upload one or more Cognos reports in txt format.")
