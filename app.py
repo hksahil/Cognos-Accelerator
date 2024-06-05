@@ -110,28 +110,28 @@ if uploaded_files:
             st.write(f"**Package Name:** {package_name}")
             st.write(f"**Model Name:** {model_name}")
             
-            st.info("Datasources used in the Report")
+            #st.info("Datasources used in the Report")
             for datasource in datasource_details:
-                st.code(f"Query Name: {datasource['query_name']}")
+                #st.code(f"Query Name: {datasource['query_name']}")
                 
                 if datasource['columns']:
                     columns_df = pd.DataFrame(datasource['columns'])
-                    st.dataframe(columns_df)
+                    #st.dataframe(columns_df)
                 
                 if datasource['detail_filters']:
-                    st.write("**Detail Filters:**")
+                    #st.write("**Detail Filters:**")
                     filters_df = pd.DataFrame(datasource['detail_filters'])
-                    st.dataframe(filters_df)
+                    #st.dataframe(filters_df)
             
-            st.info("Pages present inside Report")
+            # st.info("Pages present inside Report")
             for page in page_details:
-                st.subheader(f"Report Page: {page['page_name']}")
+                #st.subheader(f"Report Page: {page['page_name']}")
                 
                 for content in page['content']:
-                    st.write(f"**Referenced Query:** {content['ref_query']}")
+                    # st.write(f"**Referenced Query:** {content['ref_query']}")
                     if content['columns']:
                         columns_df = pd.DataFrame(content['columns'], columns=['Column Name'])
-                        st.dataframe(columns_df)
+                        #st.dataframe(columns_df)
     
             # Collecting data for the final dataframe
             rows = []
