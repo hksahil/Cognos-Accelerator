@@ -1,6 +1,36 @@
 import streamlit as st
 import xml.etree.ElementTree as ET
 import pandas as pd
+import regex as re
+import openai
+import pandas as pd
+
+def convert_to_dax_expression(expression):
+    response = openai.Completion.create(
+        model="gpt-3.5-turbo",
+        prompt=f"Convert the following expression to a DAX expression: {expression}",
+        max_tokens=100
+    )
+    dax_expression = response.choices[0].text.strip()
+    return dax_expression
+
+def process_dataframe(df):
+    # Create a new column for the PowerBI formula
+    df['powerbi formula'] = None
+    
+    # Iterate over the dataframe rows
+    for index, row in df.iterrows():
+        if row['Rollup Aggregate'].lower() == 'total':
+            # Get the expression
+            expression = row['Expression']
+            
+            # Convert the expression to DAX
+            dax_expression = convert_to_dax_expression(expression)
+            
+            # Save the DAX expression in the new column
+            df.at[index, 'powerbi formula'] = dax_expression
+    
+    return df
 
 def parse_model_path(model_path):
     """
@@ -157,15 +187,33 @@ if uploaded_files:
                         'Used in Report Page': used_in_page
                     })
             final_columns_df = pd.concat([final_columns_df, pd.DataFrame(rows)], ignore_index=True)
+        # Define regex pattern
+    pattern = r'\[([^\]]+)\]\.\[([^\]]+)\]\.\[([^\]]+)\]'
+
+    # Function to extract source
+    def extract_source(text):
+        match = re.search(pattern, text)
+        if match:
+            return f"{match.group(1)}.{match.group(2)}"
+        else:
+            return ''
+
+    # Apply function to create new column
+    final_columns_df['Source'] = final_columns_df['Expression'].apply(extract_source)
 
     # Rearranging columns so that 'Report Name' is first
     final_columns_df = final_columns_df[[
         'Report Name', 'Report Page Name', 'Query Name', 'Column Name', 
-        'Expression', 'Rollup Aggregate', 'Aggregate', 'Used in Report Page'
+        'Expression', 'Rollup Aggregate', 'Aggregate', 'Used in Report Page','Source'
     ]]
+
+    # Process the dataframe
+    #final_columns_df = process_dataframe(final_columns_df)
 
     st.info("Report Analysis")
     st.dataframe(final_columns_df)
+    
+
 
     # Add download button for the final dataframe
     csv = final_columns_df.to_csv(index=False).encode('utf-8')
