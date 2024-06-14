@@ -5,32 +5,32 @@ import regex as re
 import openai
 import pandas as pd
 
-def convert_to_dax_expression(expression):
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo",
-        prompt=f"Convert the following expression to a DAX expression: {expression}",
-        max_tokens=100
-    )
-    dax_expression = response.choices[0].text.strip()
-    return dax_expression
+# def convert_to_dax_expression(expression):
+#     response = openai.Completion.create(
+#         model="gpt-3.5-turbo",
+#         prompt=f"Convert the following expression to a DAX expression: {expression}",
+#         max_tokens=100
+#     )
+#     dax_expression = response.choices[0].text.strip()
+#     return dax_expression
 
-def process_dataframe(df):
-    # Create a new column for the PowerBI formula
-    df['powerbi formula'] = None
+# def process_dataframe(df):
+#     # Create a new column for the PowerBI formula
+#     df['powerbi formula'] = None
     
-    # Iterate over the dataframe rows
-    for index, row in df.iterrows():
-        if row['Rollup Aggregate'].lower() == 'total':
-            # Get the expression
-            expression = row['Expression']
+#     # Iterate over the dataframe rows
+#     for index, row in df.iterrows():
+#         if row['Rollup Aggregate'].lower() == 'total':
+#             # Get the expression
+#             expression = row['Expression']
             
-            # Convert the expression to DAX
-            dax_expression = convert_to_dax_expression(expression)
+#             # Convert the expression to DAX
+#             dax_expression = convert_to_dax_expression(expression)
             
-            # Save the DAX expression in the new column
-            df.at[index, 'powerbi formula'] = dax_expression
+#             # Save the DAX expression in the new column
+#             df.at[index, 'powerbi formula'] = dax_expression
     
-    return df
+#     return df
 
 def parse_model_path(model_path):
     """
